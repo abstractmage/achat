@@ -1,0 +1,95 @@
+.modal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  &_transition-enter {
+    .modal__inner {
+      opacity: 0;
+      transform: scale(1.1);
+    }
+  }
+
+  &_transition-enter-active {
+    .modal__inner {
+      transition: opacity .4s, transform .4s;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  &_transition-exit {
+    .modal__inner {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  &_transition-exit-active {
+    .modal__inner {
+      transition: opacity .4s, transform .4s;
+      opacity: 0;
+      transform: scale(1.1);
+    }
+  }
+
+  &__inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #c3e9e8;
+  }
+
+  &__button-close {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    width: 80px;
+    height: 80px;
+    padding: 25px;
+    box-sizing: border-box;
+    fill: #fff;
+    border-radius: 100px;
+    background: rgba(0, 0, 0, 0.1);
+    transition: background 300ms;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__body {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  &__body-container {
+    width: 500px;
+    margin: 50px auto;
+  }
+}

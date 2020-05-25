@@ -1,0 +1,46 @@
+.input {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background: rgba(255, 255, 255, .6);
+  border-radius: 2px;
+  box-sizing: border-box;
+  transition: background 200ms;
+
+  &:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+  }
+  
+  &_focused {
+    background: rgba(255, 255, 255, 1);
+  }
+
+  &_success {
+    background: green;
+  }
+
+  &_error {
+    background: red;
+  }
+
+  &__input {
+    width: 100%;
+    font-size: 18px;
+    line-height: 1.5;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 14px 20px 14px;
+    box-sizing: border-box;
+  }
+
+  @keyframes gradient { 
+    0%{background-position:0 0}
+    100%{background-position:100% 0}
+  }
+}

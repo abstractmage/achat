@@ -1,0 +1,47 @@
+.button {
+  font-size: 20px;
+  text-transform: uppercase;
+  box-sizing: border-box;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  user-select: none;
+  position: relative;
+  text-decoration: none;
+  border: 0;
+  width: 100%;
+  outline: 0;
+
+  &::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transition: background 200ms;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  &_clickable {
+    cursor: pointer;
+
+    &:hover {
+      &::before {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  &_default {
+    background: #86BCBA;
+    color: #fff;
+  }
+
+  &__text {
+    position: relative;
+  }
+}
