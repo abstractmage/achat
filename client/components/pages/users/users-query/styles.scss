@@ -1,0 +1,45 @@
+.users {
+  &__query {
+    padding: 30px;
+  }
+
+  &__query-inner {
+    display: flex;
+    height: 50px;
+    border-bottom: 1px solid #dfdfdf;
+    transition: border 200ms, box-shadow 200ms;
+
+    &_focus {
+      border-bottom: 1px solid #26a69a;
+      box-shadow: 0 1px 0 0 #26a69a;
+
+      .users__query-icon {
+        fill: #26a69a;
+      }
+    }
+  }
+
+  &__query-icon {
+    flex-grow: 0;
+    flex-basis: 50px;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: fill 200ms;
+    fill: rgba(0, 0, 0, 0.2);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__query-input {
+    background: transparent;
+    border: 0;
+    font-size: 20px;
+    outline: none;
+    flex-grow: 1;
+    flex-basis: 0%;
+    padding: 0 15px 0 5px;
+  }
+}

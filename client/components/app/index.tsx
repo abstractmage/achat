@@ -7,10 +7,13 @@ import './styles.scss';
 import UserSVG from './svg/user.svg';
 import MessageSVG from './svg/message.svg';
 import UsersSVG from './svg/users.svg';
+import { useSyncLogout } from '~/utils/hooks';
 
 
 function App(props: AppProps) {
   const { pageProps, Component, router } = props;
+
+  useSyncLogout();
 
   return (
     <div className="app">

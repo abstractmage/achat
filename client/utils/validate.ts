@@ -19,8 +19,10 @@ interface ValidationResult<TData extends ValidationData> {
 
 type ValidationRule<TData extends ValidationData> = (value: any, data: TData) => { success: boolean; value: any; message?: string };
 
+type ValidationRuleAsync<TData extends ValidationData> = (value: any, data: TData) => Promise<{ success: boolean; value: any; message?: string }>;
+
 type ValidationOptions<TData extends ValidationData> = {
-  [key in keyof TData]?: ValidationRule<TData>[];
+  [key in keyof TData]?: (ValidationRule<TData> | ValidationRuleAsync<TData>)[];
 }
 
 export const required: <TData extends ValidationData>(message?: string) => ValidationRule<TData> = (message = 'Field is required') => value => {
@@ -68,17 +70,29 @@ export const string: <TData extends ValidationData>(message?: string) => Validat
   return { success: true, value };
 };
 
-export default <TData extends ValidationData>(data: TData, options: ValidationOptions<TData>, onlyErrors: boolean = false): ValidationResult<TData> => {
+type ValidateFunc = <TData extends ValidationData>(
+  data: TData,
+  options: ValidationOptions<TData>,
+  onlyErrors?: boolean,
+) => Promise<ValidationResult<TData>>;
+
+const validate: ValidateFunc = async <TData extends ValidationData>(
+  data: TData,
+  options: ValidationOptions<TData>,
+  onlyErrors: boolean = false,
+) => {
   const result: any = {
     success: true,
     fields: {},
   };
 
-  Object.entries(options).forEach(([key, rules]) => {
+  const optionsArr = Object.entries(options);
+
+  for (let [key, rules] of optionsArr) {
     const value = data[key];
 
-    for (let rule of (rules as ValidationRule<TData>[])) {
-      const ruleResult = rule(value, data);
+    for (let rule of (rules as (ValidationRule<TData> | ValidationRuleAsync<TData>)[])) {
+      const ruleResult = await rule(value, data);
 
       if (!ruleResult.success) {
         result.success = false;
@@ -95,7 +109,10 @@ export default <TData extends ValidationData>(data: TData, options: ValidationOp
         };
       }
     }
-  });
+  }
 
   return result;
 };
+
+
+export default validate;

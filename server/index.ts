@@ -6,14 +6,16 @@ import helmet from 'helmet';
 import App from './app';
 import UserController from './controllers/user';
 import AuthController from './controllers/auth';
+import identification from './middlewares/identification';
 
 
 const app = new App({
   middleWares: [
-    cors(),
+    cors({ credentials: true, origin: ['http://localhost:3000', 'http://localhost:3001'] }),
     helmet(),
     bodyParser.json(),
     cookieParser(),
+    identification,
   ],
   controllers: [
     new UserController,

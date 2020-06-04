@@ -41,6 +41,7 @@ export default (state: IndexPageState = defaultState, action: ActionIndexPage): 
         [action.input]: {
           ...state.signInForm[action.input],
           value: action.value,
+          state: 'default',
         },
       },
     };
@@ -51,6 +52,7 @@ export default (state: IndexPageState = defaultState, action: ActionIndexPage): 
         [action.input]: {
           ...state.signUpForm[action.input],
           value: action.value,
+          state: 'default',
         },
       },
     };
@@ -76,6 +78,19 @@ export default (state: IndexPageState = defaultState, action: ActionIndexPage): 
       ...state,
       signUpForm: {
         ...defaultState.signUpForm,
+      },
+    };
+    case 'INDEX-PAGE/SIGN-IN-REQUEST': return {
+      ...state,
+      signInForm: {
+        email: {
+          value: action.email,
+          state: 'success',
+        },
+        password: {
+          value: action.password,
+          state: 'success',
+        },
       },
     };
     default: return state;

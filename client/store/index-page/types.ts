@@ -63,10 +63,17 @@ export interface ActionIndexPageSignUpClear {
   type: SIGN_UP_CLEAR;
 }
 
+export interface ActionIndexPageSignInRequest {
+  type: 'INDEX-PAGE/SIGN-IN-REQUEST';
+  email: string;
+  password: string;
+}
+
 export type ActionIndexPage =
   | ActionIndexPageSignInFormInputChange
   | ActionIndexPageSignUpFormInputChange
   | ActionIndexPageSignInFormValidationResult
   | ActionIndexPageSignUpFormValidationResult
   | ActionIndexPageSignInClear
-  | ActionIndexPageSignUpClear;
+  | ActionIndexPageSignUpClear
+  | ActionIndexPageSignInRequest;

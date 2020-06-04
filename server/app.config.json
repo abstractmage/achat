@@ -1,6 +1,7 @@
 {
   "port": 3001,
   "host": "localhost",
+  "frontDomain": "localhost:3000",
   "mongoose": {
     "useNewUrlParser": true,
     "useUnifiedTopology": true,

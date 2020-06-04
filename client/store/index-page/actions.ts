@@ -1,5 +1,5 @@
 import {
-  SignInField, SignUpField, ActionIndexPageSignInFormInputChange, ActionIndexPageSignUpFormInputChange, ActionIndexPageSignInFormValidationResult, SignInFields, SignUpFields, ActionIndexPageSignUpFormValidationResult, ActionIndexPageSignUpClear, ActionIndexPageSignInClear,
+  SignInField, SignUpField, ActionIndexPageSignInFormInputChange, ActionIndexPageSignUpFormInputChange, ActionIndexPageSignInFormValidationResult, SignInFields, SignUpFields, ActionIndexPageSignUpFormValidationResult, ActionIndexPageSignUpClear, ActionIndexPageSignInClear, ActionIndexPageSignInRequest,
 } from './types';
 
 
@@ -23,6 +23,12 @@ export const setSignInValidationResult = (fields: SignInFields): ActionIndexPage
 export const setSignUpValidationResult = (fields: SignUpFields): ActionIndexPageSignUpFormValidationResult => ({
   type: 'INDEX-PAGE/SIGN-UP-FORM-VALIDATION-RESULT',
   fields,
+});
+
+export const signInRequest = (email: string, password: string): ActionIndexPageSignInRequest => ({
+  type: 'INDEX-PAGE/SIGN-IN-REQUEST',
+  email,
+  password,
 });
 
 export const clearSignIn = (): ActionIndexPageSignInClear => ({ type: 'INDEX-PAGE/SIGN-IN-CLEAR' });

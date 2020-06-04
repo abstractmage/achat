@@ -7,13 +7,14 @@ import './styles.scss';
 interface ButtonProps {
   type?: 'success' | 'default' | 'error';
   component?: React.ElementType;
+  clickable?: boolean;
 }
 
 const Button = React.forwardRef(function Button(
   props: ButtonProps & React.HTMLAttributes<HTMLElement>,
   ref?: React.Ref<any>,
 ) {
-  const { type, children, component, ...otherProps } = props;
+  const { type, children, component, clickable, ...otherProps } = props;
   const Component = component!;
 
   return (
@@ -24,7 +25,9 @@ const Button = React.forwardRef(function Button(
         'button',
         otherProps.className,
         type && `button_${type}`,
-        otherProps.onClick && 'button_clickable',
+        clickable
+          ? 'button_clickable'
+          : (otherProps.onClick && 'button_clickable'),
       )}
     >
       <div className="button__text">{children}</div>
@@ -36,6 +39,7 @@ const Button = React.forwardRef(function Button(
 Button.defaultProps = {
   type: 'default',
   component: 'div',
+  clickable: false,
 };
 
 export default Button;

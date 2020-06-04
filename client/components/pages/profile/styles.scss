@@ -27,6 +27,27 @@
     box-sizing: border-box;
     border-radius: 100px;
 
+    &_green {
+      background: #86BFBD;
+    }
+
+    &_orange {
+      background: #EBC8B9;
+    }
+
+    &_red {
+      background: #EEBABA;
+    }
+
+    &_text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
     svg {
       width: 100%;
       height: 100%;

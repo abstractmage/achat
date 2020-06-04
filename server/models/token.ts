@@ -1,7 +1,7 @@
 import mongoose from './../mongoose';
 
 import User from './user';
-import { encode } from './../utils/token-service';
+import { encode, decode } from './../utils/token-service';
 import { auth } from './../app.config.json';
 
 
@@ -11,10 +11,12 @@ export interface TokenDocument extends mongoose.Document {
   value: string;
   userId: mongoose.Types.ObjectId;
   fingerprint: string;
+  decode(): ReturnType<typeof decode>;
 }
 
 export interface TokenModel<T extends mongoose.Document> extends mongoose.Model<T> {
   createUserTokens(userId: mongoose.Types.ObjectId, fingerprint: string): Promise<[TokenDocument, TokenDocument]>;
+  findByValue(value: string): Promise<TokenDocument | null>
 }
 
 const tokenSchema = new mongoose.Schema({
@@ -48,7 +50,7 @@ const tokenSchema = new mongoose.Schema({
 
 tokenSchema.statics.createUserTokens = async function (userId: mongoose.Types.ObjectId, fingerprint: string) {
   const self: TokenModel<TokenDocument> = this;
-  const tokens = await self.find({ userId });
+  const tokens = await self.find({ userId, fingerprint });
   await Promise.all(tokens.map(t => t.remove()));
 
   return self.create([{
@@ -65,6 +67,18 @@ tokenSchema.statics.createUserTokens = async function (userId: mongoose.Types.Ob
     fingerprint,
   }]);
 };
+
+tokenSchema.statics.findByValue = async function (value: string) {
+  const self: TokenModel<TokenDocument> = this;
+
+  return self.findOne({ value });
+};
+
+tokenSchema.methods.decode = function () {
+  const self = this as TokenDocument;
+  
+  return decode(self.value);
+}
 
 const Token = mongoose.model<TokenDocument, TokenModel<TokenDocument>>('Token', tokenSchema);
 

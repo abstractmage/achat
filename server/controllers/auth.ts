@@ -8,6 +8,7 @@ import ValidationError from '../utils/errors/validation-error';
 import User from './../models/user';
 import { compare } from '../utils/encryption';
 import Token from '../models/token';
+import config from '../app.config.json';
 
 
 interface SignInBody {
@@ -39,6 +40,7 @@ class AuthController implements BaseController {
 
   initRoutes() {
     this.router.post(['/auth/sign-in'], this.signIn);
+    this.router.get(['/auth/identification'], this.identification);
   }
 
 
@@ -74,16 +76,29 @@ class AuthController implements BaseController {
       const [accessToken, refreshToken] = await Token.createUserTokens(user._id, data.fingerprint);
 
       res.status(200)
-        .cookie('access-token', accessToken.value, { path: '/', expires: accessToken.expiresOn })
-        .cookie('refresh-token', refreshToken.value, { path: '/', expires: refreshToken.expiresOn })
+        .cookie('access-token', accessToken.value, {
+          path: '/',
+          expires: accessToken.expiresOn,
+        })
+        .cookie('refresh-token', refreshToken.value, {
+          path: '/',
+          expires: refreshToken.expiresOn,
+        })
         .json({
           user,
-          accessToken,
-          refreshToken,
+          accessToken: accessToken.value,
+          refreshToken: accessToken.value,
         });
     } catch (err) {
       handleErrors(res, err);
     }
+  };
+
+  private identification = (req: Request, res: Response) => {
+    res.status(200)
+      .json({
+        user: res.locals.user || null,
+      });
   };
 }
 

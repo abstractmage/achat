@@ -10,10 +10,11 @@ interface InputProps {
   placeholder?: string | number | string[];
   type?: string;
   state?: 'default' | 'error' | 'success';
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 function Input(props: InputProps & Omit<React.HTMLAttributes<HTMLElement>, 'onChange'>) {
-  const { value, onChange, placeholder, type, state, ...otherProps } = props;
+  const { value, onChange, placeholder, type, state, inputRef, ...otherProps } = props;
   const [focus, setFocus] = React.useState(false);
 
   return (
@@ -27,6 +28,7 @@ function Input(props: InputProps & Omit<React.HTMLAttributes<HTMLElement>, 'onCh
       )}
     >
       <input
+        ref={inputRef}
         type={type}
         className="input__input"
         value={value}
