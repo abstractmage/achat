@@ -5,10 +5,13 @@ import { UsersContext } from '~/pages/users';
 import getInitials from '~/utils/get-initials';
 import generateColor from '~/utils/generate-color';
 import Item from '~/components/item';
+import useDispatch from '~/store/dispatch';
+import { createChatRequest } from '~/store/users-page/actions';
 
 
 function UsersList() {
   const { users } = React.useContext(UsersContext);
+  const dispatch = useDispatch();
 
   return (
     users
@@ -24,6 +27,8 @@ function UsersList() {
                 }}
                 first={user.nickname}
                 second={user.email}
+                onClick={() => dispatch(createChatRequest(user._id))}
+                hoverable
               />
             ))
           }

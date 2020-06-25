@@ -1,10 +1,10 @@
 import mongoosePaginate from 'mongoose-paginate-v2';
 
-import mongoose from './../mongoose';
+import Mongoose from './../mongoose';
 
 
-export interface UserDocument extends mongoose.Document {
-  _id: mongoose.Types.ObjectId;
+export interface UserDocument extends Mongoose.Document {
+  _id: Mongoose.Types.ObjectId;
   nickname: string;
   email: string;
   password: string;
@@ -12,7 +12,7 @@ export interface UserDocument extends mongoose.Document {
   updatedAt: Date;
 }
 
-export interface UserModel<T extends mongoose.Document> extends mongoose.PaginateModel<T> {
+export interface UserModel<T extends Mongoose.Document> extends Mongoose.PaginateModel<T> {
   findByEmail(email: string): Promise<UserDocument | null>;
 }
 
@@ -34,7 +34,7 @@ const validatePassword = {
   message: 'Invalid character or length.',
 };
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Mongoose.Schema({
   nickname: {
     type: String,
     required: [true, 'Field is required.'],
@@ -72,7 +72,7 @@ userSchema.statics.findByEmail = function (email: string) {
 
 userSchema.plugin(mongoosePaginate);
 
-const User = mongoose.model<UserDocument>('User', userSchema) as UserModel<UserDocument>;
+const User = Mongoose.model<UserDocument>('User', userSchema) as UserModel<UserDocument>;
 
 
 export default User;

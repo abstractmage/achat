@@ -8,7 +8,9 @@ import ValidationError from '../utils/errors/validation-error';
 import User from './../models/user';
 import { compare } from '../utils/encryption';
 import Token from '../models/token';
-import config from '../app.config.json';
+import getTokenVal from '../utils/get-token';
+import BadRequestError from '../utils/errors/bad-request-error';
+import isAuthorized from '../middlewares/is-authorized';
 
 
 interface SignInBody {
@@ -40,7 +42,9 @@ class AuthController implements BaseController {
 
   initRoutes() {
     this.router.post(['/auth/sign-in'], this.signIn);
-    this.router.get(['/auth/identification'], this.identification);
+    this.router.get(['/auth/user'], isAuthorized, this.getAuthUser);
+    this.router.post(['/auth/refresh-tokens'], this.refreshTokens);
+    this.router.post(['/auth/sign-out'], this.signOut);
   }
 
 
@@ -76,25 +80,62 @@ class AuthController implements BaseController {
       const [accessToken, refreshToken] = await Token.createUserTokens(user._id, data.fingerprint);
 
       res.status(200)
-        .cookie('access-token', accessToken.value, {
-          path: '/',
-          expires: accessToken.expiresOn,
-        })
         .cookie('refresh-token', refreshToken.value, {
           path: '/',
           expires: refreshToken.expiresOn,
+          httpOnly: true,
         })
-        .json({
-          user,
-          accessToken: accessToken.value,
-          refreshToken: accessToken.value,
-        });
+        .cookie('access-token', accessToken.value, {
+          path: '/',
+          expires: accessToken.expiresOn,
+          httpOnly: true,
+        })
+        .json({ user });
     } catch (err) {
       handleErrors(res, err);
     }
   };
 
-  private identification = (req: Request, res: Response) => {
+
+  private refreshTokens = async (req: Request, res: Response) => {
+    try {
+      const refreshTokenVal = getTokenVal(req, 'refresh');
+      const refreshToken = refreshTokenVal ? await Token.findByValue(refreshTokenVal) : null;
+
+      if (!refreshToken) throw new BadRequestError({
+        message: 'Token Refresh Failed: invalid token',
+      });
+
+      const user = await User.findById(refreshToken.userId);
+      const [newAccessToken, newRefreshToken] = await Token.createUserTokens(user!._id, refreshToken.fingerprint);
+
+      res.status(201)
+        .cookie('access-token', newAccessToken.value, {
+          path: '/',
+          expires: newAccessToken.expiresOn,
+          httpOnly: true,
+        })
+        .cookie('refresh-token', newRefreshToken.value, {
+          path: '/',
+          expires: newRefreshToken.expiresOn,
+          httpOnly: true,
+        })
+        .json({ user });
+    } catch (err) {
+      handleErrors(res, err);
+    }
+  };
+
+
+  private signOut = async (req: Request, res: Response) => {
+    res.status(200)
+      .clearCookie('refresh-token')
+      .clearCookie('access-token')
+      .json({});
+  };
+
+
+  private getAuthUser = (req: Request, res: Response) => {
     res.status(200)
       .json({
         user: res.locals.user || null,

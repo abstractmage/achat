@@ -26,8 +26,14 @@ export interface ActionUsersPageSetQuery {
   query: string;
 }
 
+export interface ActionUsersPageCreateChatRequest {
+  type: 'USERS-PAGE/CREATE-CHAT-REQUEST';
+  userId: string;
+}
+
 export type ActionUsersPage =
   | ActionUsersPageRequestUsers
   | ActionUsersPageSetUsers
   | ActionUsersPageSetQuery
-  | ActionUsersPageRequestMoreUsers;
+  | ActionUsersPageRequestMoreUsers
+  | ActionUsersPageCreateChatRequest;

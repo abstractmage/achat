@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-import mongoose from '../mongoose';
+import Mongoose from '../mongoose';
 import { auth } from '../app.config.json';
 
 
-export const encode = (id: mongoose.Types.ObjectId, type: 'access' | 'refresh') =>
+export const encode = (id: Mongoose.Types.ObjectId, type: 'access' | 'refresh') =>
   jwt.sign({ userId: id, type }, auth.secret, { expiresIn: auth.options[type].expiresIn });
 
 

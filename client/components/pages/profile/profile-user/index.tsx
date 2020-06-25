@@ -1,23 +1,13 @@
 import React from 'react';
-import Router from 'next/router';
 import { useSelector } from 'react-redux';
 import cx from 'classnames';
-import Cookies from 'js-cookie';
 
 import Button from '~/components/button';
-import { userSelector } from '~/store/user/selectors';
 import useDispatch from '~/store/dispatch';
-import { outUser } from '~/store/user/actions';
+import { userSelector } from '~/store/auth/selectors';
+import generateColor from '~/utils/generate-color';
+import { signOutRequest } from '~/store/auth/actions';
 
-
-const generateColor = (id: string) => {
-  const lastChar = id[id.length - 1];
-
-  if (/[01234]/g.test(lastChar)) return 'green';
-  else if (/[56789]/g.test(lastChar)) return 'orange';
-  
-  return 'red';
-};
 
 const getInitials = (nickname: string) => {
   const words = nickname.split(' ');
@@ -31,13 +21,7 @@ function ProfileUser() {
   const user = useSelector(userSelector)!;
   const dispatch = useDispatch();
 
-  const handleSignOutClick = () => {
-    Cookies.remove('access-token');
-    Cookies.remove('refresh-token');
-    window.localStorage.setItem('logout', Date.now().toString());
-    dispatch(outUser());
-    Router.push('/', '/', { shallow: true });
-  };
+  const handleSignOutClick = () => dispatch(signOutRequest());
 
   return (
     <div className="profile">

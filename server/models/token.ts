@@ -1,25 +1,26 @@
-import mongoose from './../mongoose';
+import Mongoose from './../mongoose';
 
 import User from './user';
 import { encode, decode } from './../utils/token-service';
 import { auth } from './../app.config.json';
 
 
-export interface TokenDocument extends mongoose.Document {
+export interface TokenDocument extends Mongoose.Document {
   type: 'access' | 'refresh';
   expiresOn: Date;
   value: string;
-  userId: mongoose.Types.ObjectId;
+  userId: Mongoose.Types.ObjectId;
   fingerprint: string;
   decode(): ReturnType<typeof decode>;
 }
 
-export interface TokenModel<T extends mongoose.Document> extends mongoose.Model<T> {
-  createUserTokens(userId: mongoose.Types.ObjectId, fingerprint: string): Promise<[TokenDocument, TokenDocument]>;
+export interface TokenModel<T extends Mongoose.Document> extends Mongoose.Model<T> {
+  createUserTokens(userId: Mongoose.Types.ObjectId, fingerprint: string): Promise<[TokenDocument, TokenDocument]>;
   findByValue(value: string): Promise<TokenDocument | null>
+  getPair(value: string): Promise<null | [TokenDocument, TokenDocument]>;
 }
 
-const tokenSchema = new mongoose.Schema({
+const tokenSchema = new Mongoose.Schema({
   type: {
     type: String,
     enum: ['access', 'refresh'],
@@ -34,7 +35,7 @@ const tokenSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Types.ObjectId,
+    type: Mongoose.Types.ObjectId,
     ref: 'User',
     required: true,
   },
@@ -48,7 +49,7 @@ const tokenSchema = new mongoose.Schema({
   collection: 'tokens',
 });
 
-tokenSchema.statics.createUserTokens = async function (userId: mongoose.Types.ObjectId, fingerprint: string) {
+tokenSchema.statics.createUserTokens = async function (userId: Mongoose.Types.ObjectId, fingerprint: string) {
   const self: TokenModel<TokenDocument> = this;
   const tokens = await self.find({ userId, fingerprint });
   await Promise.all(tokens.map(t => t.remove()));
@@ -69,9 +70,27 @@ tokenSchema.statics.createUserTokens = async function (userId: mongoose.Types.Ob
 };
 
 tokenSchema.statics.findByValue = async function (value: string) {
-  const self: TokenModel<TokenDocument> = this;
+  try {
+    const self: TokenModel<TokenDocument> = this;
+    const token = await self.findOne({ value });
+    token?.decode();
 
-  return self.findOne({ value });
+    return token;
+  } catch {
+    return null;
+  }
+};
+
+tokenSchema.statics.getPair = async function (value: string) {
+  const self: TokenModel<TokenDocument> = this;
+  const firstToken = await self.findByValue(value);
+
+  if (!firstToken) return null;
+
+  const { userId } = firstToken.decode();
+  const secondToken = (await self.findOne({ userId, fingerprint: firstToken.fingerprint }))!;
+
+  return [firstToken, secondToken];
 };
 
 tokenSchema.methods.decode = function () {
@@ -80,7 +99,7 @@ tokenSchema.methods.decode = function () {
   return decode(self.value);
 }
 
-const Token = mongoose.model<TokenDocument, TokenModel<TokenDocument>>('Token', tokenSchema);
+const Token = Mongoose.model<TokenDocument, TokenModel<TokenDocument>>('Token', tokenSchema);
 
 
 export default Token;

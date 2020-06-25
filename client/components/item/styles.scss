@@ -1,6 +1,15 @@
 .item {
   display: flex;
 
+  &_hoverable {
+    transition: background 200ms;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
   &__image-wrap {
     padding: 10px 30px;
     flex-grow: 0;

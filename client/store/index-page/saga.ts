@@ -3,18 +3,18 @@ import Router from 'next/router';
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 import { ActionIndexPageSignInRequest } from './types';
-import { signIn, SignInValidationError, SignInResult } from '~/utils/api';
+import api, { SignInValidationError, SignInResult } from '~/utils/api';
 import { setSignInValidationResult } from './actions';
-import { setUser } from '../user/actions';
+import { signIn } from '../auth/actions';
 
 
 function* workerSignInRequest({ email, password }: ActionIndexPageSignInRequest) {
   try {
-    const result: SignInResult = yield call(signIn, email, password);
+    const result: SignInResult = yield call(api.signIn.bind(api), email, password);
 
     yield call(Router.push, '/');
-    
-    yield put(setUser(result.data.user));
+
+    yield put(signIn(result.data.user, result.data.accessToken));
   } catch (err) {
     const error: SignInValidationError = err;
 
@@ -43,10 +43,10 @@ function* watchSignInRequest() {
   yield takeEvery('INDEX-PAGE/SIGN-IN-REQUEST', workerSignInRequest);
 }
 
-function* watchIndexPage() {
+function* indexPageSaga() {
   yield all([
     watchSignInRequest(),
   ]);
 }
 
-export default watchIndexPage;
+export default indexPageSaga;

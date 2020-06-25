@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import Mongoose from 'mongoose';
 import config from './../app.config.json';
 
-mongoose.connect(`mongodb://${config.host}/achat`, config.mongoose);
+Mongoose.connect(`mongodb://${config.host}/achat`, config.mongoose);
 
-export default mongoose;
+export default Mongoose;

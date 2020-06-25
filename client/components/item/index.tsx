@@ -8,6 +8,7 @@ type ItemProps = {
   image: JSX.Element | { initials: string; color: 'green' | 'orange' | 'red' };
   first: JSX.Element | string;
   second: JSX.Element | string;
+  hoverable?: boolean;
 }
 
 const getDefaultImage = (initials: string, color: 'green' | 'orange' | 'red') => (
@@ -17,14 +18,14 @@ const getDefaultImage = (initials: string, color: 'green' | 'orange' | 'red') =>
 );
 
 function Item(props: ItemProps & React.HTMLAttributes<HTMLElement>) {
-  let { first, second, image, ...otherProps } = props;
+  let { first, second, image, hoverable, ...otherProps } = props;
 
   if ('initials' in image) {
     image = getDefaultImage(image.initials, image.color);
   }
 
   return (
-    <div {...otherProps} className={cx('item', otherProps.className)}>
+    <div {...otherProps} className={cx('item', hoverable && 'item_hoverable', otherProps.className)}>
       <div className="item__image-wrap">{image}</div>
       <div className="item__text-wrap">
         <div className="item__text-inner-wrap">
@@ -35,6 +36,10 @@ function Item(props: ItemProps & React.HTMLAttributes<HTMLElement>) {
     </div>
   );
 }
+
+Item.defaultProps = {
+  hoverable: false,
+};
 
 
 export default Item;

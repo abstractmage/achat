@@ -35,7 +35,7 @@ function App(props: AppProps) {
             <a
               className={cx(
                 'app__nav-link',
-                router.route === '/chats' && 'app__nav-link_active'
+                ['/chats', '/chat', '/chats/[id]', '/chat/[id]'].includes(router.route) && 'app__nav-link_active'
               )}
             >
               <div className="app__nav-link-inner">

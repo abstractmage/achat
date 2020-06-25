@@ -50,6 +50,7 @@ function UsersQuery(props: UsersQueryProps) {
           onChange={e => onChange(e.currentTarget.value)}
           onFocus={focus}
           onBlur={blur}
+          placeholder="Search..."
         />
       </div>
     </div>

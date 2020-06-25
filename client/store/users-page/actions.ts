@@ -1,8 +1,8 @@
-import { ActionUsersPageRequestUsers, ActionUsersPageSetUsers, ActionUsersPageSetQuery, ActionUsersPageRequestMoreUsers } from "./types";
+import { ActionUsersPageRequestUsers, ActionUsersPageSetUsers, ActionUsersPageSetQuery, ActionUsersPageRequestMoreUsers, ActionUsersPageCreateChatRequest } from "./types";
 import Pagination from "~/types/pagination";
 import User from "~/types/user";
 
-export const requestUsers = (query: string): ActionUsersPageRequestUsers =>
+export const requestUsers = (query: string = ''): ActionUsersPageRequestUsers =>
   ({ type: 'USERS-PAGE/REQUEST-USERS', query });
 
 export const requestMore = (): ActionUsersPageRequestMoreUsers =>
@@ -13,3 +13,6 @@ export const setUsers = (users: Pagination<User>): ActionUsersPageSetUsers =>
 
 export const setQuery = (query: string): ActionUsersPageSetQuery =>
   ({ type: 'USERS-PAGE/SET-QUERY', query });
+
+export const createChatRequest = (userId: string): ActionUsersPageCreateChatRequest =>
+  ({ type: 'USERS-PAGE/CREATE-CHAT-REQUEST', userId });

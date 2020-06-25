@@ -1,13 +1,14 @@
 import { Router, Request, Response } from 'express';
 import _ from 'lodash';
-import mongoose from './../mongoose';
+import Mongoose from './../mongoose';
 
 import BaseController from "../types/base-controller";
-import User from './../models/user';
+import User, { UserDocument } from './../models/user';
 import validate, { required, email, string, match } from './../utils/validate';
 import ValidationError from '../utils/errors/validation-error';
 import handleErrors from '../utils/handle-errors';
 import { encrypt } from './../utils/encryption';
+import isAuthorized from '../middlewares/is-authorized';
 
 
 interface CreateUserBody {
@@ -18,7 +19,8 @@ interface CreateUserBody {
 
 interface GetUsersQuery {
   query?: string;
-  pagination?: mongoose.PaginateOptions;
+  pagination?: Mongoose.PaginateOptions;
+  'with-auth-user'?: string;
 }
 
 const checkEmailUnique = (email: string) => async () => {
@@ -43,8 +45,8 @@ class UserController implements BaseController {
 
 
   initRoutes() {
-    this.router.get(['/user', '/users'], this.getUsers);
-    this.router.post(['/user', '/users'], this.createUser);
+    this.router.get(['/user', '/users'], isAuthorized, this.getUsers);
+    this.router.post(['/user', '/users'], isAuthorized, this.createUser);
   }
 
 
@@ -84,12 +86,19 @@ class UserController implements BaseController {
 
   private getUsers = async (req: Request, res: Response) => {
     const { query, pagination } = req.query as GetUsersQuery;
-    const users = await User.paginate(
-      query
-        ? { $or: [{ email: { $regex: query } }, { nickname: { $regex: query } }] }
-        : {},
-      pagination
-    );
+    let withAuthUser: boolean;
+
+    if (req.query['with-auth-user'] === 'false') withAuthUser = false;
+    else withAuthUser = !!req.query['with-auth-user'];
+
+    const paginateQuery: any = query
+      ? { $or: [{ email: { $regex: query } }, { nickname: { $regex: query } }]}
+      : {};
+    const user = res.locals.user as (UserDocument | null);
+
+    if (!withAuthUser && user) paginateQuery._id = { $ne: user.id };
+
+    const users = await User.paginate(paginateQuery, pagination);
 
     res.status(200)
       .json(users);
