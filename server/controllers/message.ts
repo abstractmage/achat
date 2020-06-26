@@ -118,6 +118,8 @@ class MessageController implements BaseController {
         value,
       });
 
+      this.io.to(chatId).emit('message', message);
+
       res.status(201)
         .json({
           message,

@@ -12,7 +12,7 @@ function ProfileSignUp(props: ProfileSignUpProps) {
   const { show } = props;
 
   return (
-    <Modal show={show} onClose={() => Router.push('/')} container={null}>
+    <Modal show={show} onClose={() => Router.push('/', '/', { shallow: true })} container={null}>
     </Modal>
   );
 }

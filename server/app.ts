@@ -64,10 +64,14 @@ class App {
         return;
       }
 
-      // socket.in(`user-${user._id}`);
+      if (socket.handshake.query.chatId) {
+        socket.join(socket.handshake.query.chatId);
+      }
 
       next();
     });
+
+    this.io.on('connect', socket => console.log('Socket Connected ---', socket.client.id));
 
     this.controllers.forEach(controller => {
       controller.setSocketServer && controller.setSocketServer(this.io);

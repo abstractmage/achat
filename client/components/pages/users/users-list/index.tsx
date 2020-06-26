@@ -1,17 +1,15 @@
 import React from 'react';
 
 import './styles.scss';
-import { UsersContext } from '~/pages/users';
 import getInitials from '~/utils/get-initials';
 import generateColor from '~/utils/generate-color';
 import Item from '~/components/item';
-import useDispatch from '~/store/dispatch';
-import { createChatRequest } from '~/store/users-page/actions';
+import { observer } from 'mobx-react';
+import { useStore } from '~/store';
 
 
 function UsersList() {
-  const { users } = React.useContext(UsersContext);
-  const dispatch = useDispatch();
+  const { usersPage: { users } } = useStore();
 
   return (
     users
@@ -27,7 +25,7 @@ function UsersList() {
                 }}
                 first={user.nickname}
                 second={user.email}
-                onClick={() => dispatch(createChatRequest(user._id))}
+                onClick={() => console.log({ ...user }) /* dispatch(createChatRequest(user._id)) */}
                 hoverable
               />
             ))
@@ -39,4 +37,4 @@ function UsersList() {
 }
 
 
-export default UsersList;
+export default observer(UsersList);

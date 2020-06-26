@@ -1,28 +1,24 @@
 import React from 'react';
-import { NextPageContext } from 'next';
-
-import Profile, { ProfileProps } from '~/components/pages/profile';
-import { AppAction, AppState } from '~/store/types';
+import { observer } from 'mobx-react';
+import Profile from '~/components/pages/profile';
 import api from '~/utils/api';
-import { setUser, signOut } from '~/store/auth/actions';
-import { AxiosError } from 'axios';
+import PageContext from '~/types/page-context';
 
-
-function Index(props: ProfileProps) {
+function Index() {
   return (
-    <Profile {...props} />
+    <Profile />
   );
 }
 
-Index.getInitialProps = async (ctx: NextPageContext<AppState, AppAction>) => {
-  const { dispatch } = ctx.store;
+Index.getInitialProps = async (ctx: PageContext) => {
+  const { store } = ctx;
 
   try {
     await api.prepare(ctx, async () => {
       const result = await api.getAuthUser();
       const { data: { user } } = result;
 
-      dispatch(setUser(user));
+      store.auth.user = user;
 
       return result;
     });
@@ -30,10 +26,7 @@ Index.getInitialProps = async (ctx: NextPageContext<AppState, AppAction>) => {
     console.log(err);
   }
 
-  return {
-    activeModal: ctx.query.modal,
-  };
+  return { isServer: !!ctx.req };
 };
 
-
-export default Index;
+export default observer(Index);

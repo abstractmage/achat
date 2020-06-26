@@ -1,20 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-
+import { observer } from 'mobx-react';
 import './styles.scss';
 import Head from '~/components/head';
 import ProfileGuest from './profile-guest';
-import { userSelector } from '~/store/selectors';
 import ProfileUser from './profile-user';
+import { useStore } from '~/store';
 
-
-export interface ProfileProps {
-  activeModal?: 'sign-up' | 'sign-in';
-}
-
-function Profile(props: ProfileProps) {
-  const { activeModal } = props;
-  const { user } = useSelector(userSelector);
+function Profile() {
+  const { auth: { user, logout } } = useStore();
 
   return (
     <>
@@ -23,12 +16,12 @@ function Profile(props: ProfileProps) {
       </Head>
       {
         user
-          ? <ProfileUser />
-          : <ProfileGuest activeModal={activeModal} />
+          ? <ProfileUser user={user} logout={logout} />
+          : <ProfileGuest />
       }
     </>
   );
 }
 
 
-export default Profile;
+export default observer(Profile);

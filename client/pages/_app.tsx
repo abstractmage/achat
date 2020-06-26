@@ -1,16 +1,45 @@
 import React from 'react';
-import App from 'next/app';
-import withReduxSaga from 'next-redux-saga';
-
+import NextApp, { AppContext, AppProps } from 'next/app';
+import { Provider } from 'mobx-react';
+import 'mobx-react-lite/batchingForReactDom'
 import AppComponent from '~/components/app';
-import wrapper from '~/store/init-store';
+import AppStore, { initializeStore } from '~/store';
 
+type AppState = {
+  store: AppStore;
+};
 
-class WrappedApp extends App {
+class App extends NextApp<{ initialStoreData: AppStore }> {
+  state = {
+    store: new AppStore(),
+  };
+
+  static async getInitialProps(appCtx: AppContext) {
+    const store = initializeStore();
+
+    (appCtx.ctx as any).store = store;
+
+    const appProps = await NextApp.getInitialProps(appCtx);
+
+    return {
+      ...appProps,
+      initialStoreData: store,
+    };
+  }
+  
+  static getDerivedStateFromProps(props: AppProps & { initialStoreData: AppStore }, state: AppState) {
+    state.store.hydrate(props.initialStoreData);
+    return state;
+  }
+
   render() {
-    return <AppComponent {...this.props} />
+    return (
+      <Provider store={this.state.store}>
+        <AppComponent {...this.props} />
+      </Provider>
+    );
   }
 }
 
 
-export default wrapper.withRedux(withReduxSaga(WrappedApp));
+export default App;
