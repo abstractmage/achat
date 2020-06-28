@@ -33,10 +33,10 @@ function ProfileGuest() {
       <div className="profile__semi-header">
         <span className="profile__semi-header-text">you can:</span>
       </div>
-      <Link href="?modal=sign-in" passHref shallow>
+      <Link href="/?modal=sign-in" passHref shallow>
         <Button className="profile__button" component="a">Sign in</Button>
       </Link>
-      <Link href="?modal=sign-up" passHref shallow>
+      <Link href="/?modal=sign-up" passHref shallow>
         <Button className="profile__button" component="a">Sign up</Button>
       </Link>
       <ProfileSignIn />

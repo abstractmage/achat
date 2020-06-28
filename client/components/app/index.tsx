@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProps } from 'next/app';
 import Link from 'next/link';
 import cx from 'classnames';
+import { observer } from 'mobx-react';
 import './styles.scss';
 import UserSVG from './svg/user.svg';
 import MessageSVG from './svg/message.svg';
@@ -63,4 +64,4 @@ function App(props: AppProps) {
   );
 }
 
-export default App;
+export default observer(App);

@@ -12,6 +12,7 @@ import Chat from '../models/chat';
 import NotFoundError from '../utils/errors/not-found-error';
 import BadRequestError from '../utils/errors/bad-request-error';
 import Message from '../models/message';
+import ForbiddenError from '../utils/errors/forbidden-error';
 
 
 interface CreateChatBody {
@@ -125,6 +126,7 @@ class ChatController implements BaseController {
     try {
       const { id = null } = req.params;
       const lastMessages = +(req.query.lastMessages || 10);
+      const user: UserDocument = res.locals.user;
 
       if (!id || !Mongoose.Types.ObjectId.isValid(id)) throw new BadRequestError({
         message: 'Chat Getting Failed: Invalid id',
@@ -138,6 +140,10 @@ class ChatController implements BaseController {
 
       if (!chat) throw new NotFoundError({
         message: 'Chat Getting Failed: Invalid id',
+      });
+
+      if (!(await chat.isChatUser(user.id))) throw new ForbiddenError({
+        message: 'Chat Getting Failed: Forbidden',
       });
 
       const [chatUsers, messages] = await Promise.all([

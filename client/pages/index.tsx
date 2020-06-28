@@ -1,5 +1,4 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import Profile from '~/components/pages/profile';
 import api from '~/utils/api';
 import PageContext from '~/types/page-context';
@@ -18,7 +17,7 @@ Index.getInitialProps = async (ctx: PageContext) => {
       const result = await api.getAuthUser();
       const { data: { user } } = result;
 
-      store.auth.user = user;
+      store.auth.setUser(user);
 
       return result;
     });
@@ -29,4 +28,4 @@ Index.getInitialProps = async (ctx: PageContext) => {
   return { isServer: !!ctx.req };
 };
 
-export default observer(Index);
+export default Index;

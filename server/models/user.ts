@@ -1,6 +1,6 @@
 import mongoosePaginate from 'mongoose-paginate-v2';
-
 import Mongoose from './../mongoose';
+import Token from './token';
 
 
 export interface UserDocument extends Mongoose.Document {
@@ -14,6 +14,7 @@ export interface UserDocument extends Mongoose.Document {
 
 export interface UserModel<T extends Mongoose.Document> extends Mongoose.PaginateModel<T> {
   findByEmail(email: string): Promise<UserDocument | null>;
+  findByToken: (accessTokenVal: string) => Promise<UserDocument | null>;
 }
 
 const validateEmail = {
@@ -68,6 +69,17 @@ userSchema.statics.findByEmail = function (email: string) {
   const self: UserModel<UserDocument> = this;
 
   return self.findOne({ email });
+};
+
+userSchema.statics.findByToken = async function (accessTokenVal: string) {
+  const self: UserModel<UserDocument> = this;
+  const accessToken = accessTokenVal ? await Token.findByValue(accessTokenVal) : null;
+
+  if (!accessToken) return null;
+
+  const user = await self.findById(accessToken.userId);
+
+  return user;
 };
 
 userSchema.plugin(mongoosePaginate);

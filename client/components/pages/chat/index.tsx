@@ -1,12 +1,12 @@
 import React from 'react';
 import cx from 'classnames';
-import io from 'socket.io-client';
 import { observer } from 'mobx-react';
 import './styles.scss';
 import ArrowLeftSVG from './svg/arrow-left.svg';
 import SendSVG from './svg/send.svg';
 import { useStore } from '~/store';
 import Message from '~/types/message';
+import IO from '~/utils/io';
 
 const isToday = (date: Date) => {
   const today = new Date();
@@ -19,9 +19,9 @@ const isToday = (date: Date) => {
 const getMessageTime = (time: string) => {
   const date = new Date(time);
 
-  if (isToday(date)) return `${date.getHours()}:${date.getMinutes()}`;
+  if (isToday(date)) return date.toLocaleTimeString();
   
-  return `${date.getDate()}.${date.getMonth()}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+  return date.toLocaleString();
 };
 
 const useScrollBottom = (docs: any[]) => {
@@ -35,29 +35,17 @@ const useScrollBottom = (docs: any[]) => {
 };
 
 const useChatSocket = (chatId: string, action: (message: Message) => void) => {
-  const [socket, setSocket] = React.useState<SocketIOClient.Socket | null>(null);
-
   React.useEffect(() => {
-    const connect = () => {
-      const socket = io('http://localhost:3001', { query: { chatId } });
-      socket.on('message', action);// dispatch(addMessage(message)));
-      setSocket(socket);
+    const io = IO.getInstance();
+
+    io.joinChat(chatId);
+    io.socket.on('server:message', action);
+
+    return () => {
+      io.leaveChat(chatId);
+      io.socket.off('server:message', action);
     };
-
-    const disconnect = () => setSocket(socket => {
-      if (socket) {
-        socket.disconnect();
-      }
-
-      return null;
-    });
-
-    connect();
-
-    return () => disconnect();
-  }, [chatId]);
-  
-  return socket;
+  }, [chatId, action]);
 };
 
 const useChatProps = () => {

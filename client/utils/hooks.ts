@@ -1,24 +1,25 @@
 import React from 'react';
 import Router from 'next/router';
-
+import { useStore } from '~/store';
 
 export const useSyncLogout = () => {
-  // const dispatch = useDispatch();
+  const store = useStore();
 
-  // React.useEffect(() => {
-  //   /* const handleLogout = (event: StorageEvent) => {
-  //     if (event.key === 'logout') {
-  //       console.log('logged out from storage!');
-  //       Router.push('/');
-  //       dispatch(outUser());
-  //     }
-  //   }
+  React.useEffect(() => {
+    const handleLogout = (event: StorageEvent) => {
+      if (event.key === 'logout') {
+        Router.push('/');
+        store.auth.setUser(null);
+        console.log('sync-logout');
+      }
+    }
 
-  //   window.addEventListener('storage', handleLogout);
+    window.addEventListener('storage', handleLogout);
+    console.log('sync-logout-effect');
 
-  //   return () => {
-  //     window.removeEventListener('storage', handleLogout);
-  //     window.localStorage.removeItem('logout');
-  //   }; */
-  // }, [dispatch]);
+    return () => {
+      window.removeEventListener('storage', handleLogout);
+      window.localStorage.removeItem('logout');
+    };
+  }, [store.auth]);
 };

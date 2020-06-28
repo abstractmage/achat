@@ -1,6 +1,5 @@
 import React from 'react';
 import cx from 'classnames';
-import { observer } from 'mobx-react';
 import Button from '~/components/button';
 import generateColor from '~/utils/generate-color';
 import User from '~/types/user';
@@ -21,7 +20,9 @@ const getInitials = (nickname: string) => {
 function ProfileUser(props: ProfileUserProps) {
   const { user, logout } = props;
 
-  const handleSignOutClick = () => logout();
+  const handleSignOutClick = () => {
+    logout();
+  };
 
   return (
     <div className="profile">

@@ -16,8 +16,13 @@ class AppStore {
   @observable indexPage = new IndexPageStore();
   @observable usersPage = new UsersPageStore();
   @observable chatPage = new ChatPageStore();
+  
+  state: 'empty' | 'filled' = 'empty';
 
   hydrate(store: AppStore) {
+    if (this.state === 'filled') return;
+
+    this.state = 'filled';
     this.auth.hydrate(store.auth);
     this.indexPage.hydrate(store.indexPage);
     this.usersPage.hydrate(store.usersPage);

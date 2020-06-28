@@ -36,7 +36,7 @@ class IndexPageStore {
     },
   };
 
-  @action toggleSignIn(val: boolean = !this.signInModal.opened) {
+  @action toggleSignIn = (val: boolean = !this.signInModal.opened) => {
     this.signInModal.opened = val;
     this.signUpModal.opened = !val;
 
@@ -46,7 +46,7 @@ class IndexPageStore {
     });
   }
 
-  @action toggleSignUp(val: boolean = !this.signUpModal.opened) {
+  @action toggleSignUp = (val: boolean = !this.signUpModal.opened) => {
     this.signUpModal.opened = val;
     this.signInModal.opened = !val;
 
@@ -120,6 +120,7 @@ class IndexPageStore {
   }
 
   hydrate(store: IndexPageStore) {
+    // console.log(store);
   }
 }
 
