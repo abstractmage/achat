@@ -1,13 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import cx from 'classnames';
-
 import Button from '~/components/button';
-import useDispatch from '~/store/dispatch';
-import { userSelector } from '~/store/auth/selectors';
 import generateColor from '~/utils/generate-color';
-import { signOutRequest } from '~/store/auth/actions';
+import User from '~/types/user';
 
+interface ProfileUserProps {
+  user: User;
+  logout: Function;
+}
 
 const getInitials = (nickname: string) => {
   const words = nickname.split(' ');
@@ -17,11 +17,12 @@ const getInitials = (nickname: string) => {
   return words[0][0].toUpperCase();
 };
 
-function ProfileUser() {
-  const user = useSelector(userSelector)!;
-  const dispatch = useDispatch();
+function ProfileUser(props: ProfileUserProps) {
+  const { user, logout } = props;
 
-  const handleSignOutClick = () => dispatch(signOutRequest());
+  const handleSignOutClick = () => {
+    logout();
+  };
 
   return (
     <div className="profile">
@@ -39,9 +40,9 @@ function ProfileUser() {
       <div className="profile__header">
       <span className="profile__header-text">Hello, {user.nickname}!</span>
       </div>
-      {/* <div className="profile__semi-header">
+      <div className="profile__semi-header">
         <span className="profile__semi-header-text">you can:</span>
-      </div> */}
+      </div>
       <Button
         className="profile__button"
         onClick={handleSignOutClick}

@@ -29,6 +29,7 @@ const tokenSchema = new Mongoose.Schema({
   expiresOn: {
     type: Date,
     required: true,
+    expires: 0,
   },
   value: {
     type: String,

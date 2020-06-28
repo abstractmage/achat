@@ -1,19 +1,12 @@
 import React from 'react';
 import cx from 'classnames';
-
+import { observer } from 'mobx-react';
 import './styles.scss';
 import SearchSVG from './svg/search.svg';
-import useDispatch from '~/store/dispatch';
-import { requestUsers } from '~/store/users-page/actions';
-
-
-interface UsersQueryProps {
-  query: string;
-  onChange(value: string): void;
-}
+import { useStore } from '~/store';
 
 const useFocus = () => {
-  const [focused, setFocus] = React.useState(false);
+  const [focused, setFocus] = React.useState(true);
   const focus = () => setFocus(true);
   const blur = () => setFocus(false);
 
@@ -21,21 +14,22 @@ const useFocus = () => {
 };
 
 const useSubmit = (query: string, request: () => void) => {
+  const firstEffect = React.useRef(true);
   const timeout = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     timeout.current && clearTimeout(timeout.current);
 
-    timeout.current = setTimeout(request, 1000);
+    if (!firstEffect.current) timeout.current = setTimeout(request, 1000);
+
+    firstEffect.current = false;
   }, [query, request]);
 };
 
-function UsersQuery(props: UsersQueryProps) {
-  const { query, onChange } = props;
+function UsersQuery() {
+  const { usersPage: { query, setQuery, requestUsers } } = useStore();
   const [focused, focus, blur] = useFocus();
-  const dispatch = useDispatch();
-  const request = React.useCallback(() => dispatch(requestUsers(query)), [query, dispatch]);
-  useSubmit(query, request);
+  useSubmit(query, requestUsers);
 
   return (
     <div className="users__query">
@@ -47,15 +41,15 @@ function UsersQuery(props: UsersQueryProps) {
           type="text"
           className="users__query-input"
           value={query}
-          onChange={e => onChange(e.currentTarget.value)}
+          onChange={e => setQuery(e.currentTarget.value)}
           onFocus={focus}
           onBlur={blur}
           placeholder="Search..."
+          autoFocus
         />
       </div>
     </div>
   );
 }
 
-
-export default UsersQuery;
+export default observer(UsersQuery);

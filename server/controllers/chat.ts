@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { intersectionWith } from 'lodash';
+import { intersectionWith, isFinite } from 'lodash';
 
 import BaseController from "../types/base-controller";
 import isAuthorized from '../middlewares/is-authorized';
@@ -12,6 +12,7 @@ import Chat from '../models/chat';
 import NotFoundError from '../utils/errors/not-found-error';
 import BadRequestError from '../utils/errors/bad-request-error';
 import Message from '../models/message';
+import ForbiddenError from '../utils/errors/forbidden-error';
 
 
 interface CreateChatBody {
@@ -19,8 +20,7 @@ interface CreateChatBody {
 }
 
 interface GetChatQuery {
-  'users-pagination'?: any;
-  'messages-pagination'?: any;
+  lastMessages: any;
 }
 
 class ChatController implements BaseController {
@@ -125,10 +125,15 @@ class ChatController implements BaseController {
   private getChat = async (req: Request, res: Response) => {
     try {
       const { id = null } = req.params;
-      const { 'users-pagination': usersPagination, 'messages-pagination': messagesPagination } = req.query as GetChatQuery;
+      const lastMessages = +(req.query.lastMessages || 10);
+      const user: UserDocument = res.locals.user;
 
       if (!id || !Mongoose.Types.ObjectId.isValid(id)) throw new BadRequestError({
         message: 'Chat Getting Failed: Invalid id',
+      });
+
+      if (!isFinite(lastMessages)) throw new BadRequestError({
+        message: 'Chat Getting Failed: Invalid params',
       });
 
       const chat = await Chat.findById(id);
@@ -137,14 +142,18 @@ class ChatController implements BaseController {
         message: 'Chat Getting Failed: Invalid id',
       });
 
+      if (!(await chat.isChatUser(user.id))) throw new ForbiddenError({
+        message: 'Chat Getting Failed: Forbidden',
+      });
+
       const [chatUsers, messages] = await Promise.all([
         ChatUser.find({ chat: chat.id }),
-        Message.paginate({ chat: chat.id }, messagesPagination),
+        Message.paginate({ chat: chat.id }, { sort: { createdAt: -1 }, limit: lastMessages }),
       ]);
 
       const users = await User.paginate({
         _id: { $in: chatUsers.map(u => u.user) },
-      }, usersPagination);
+      }, { limit: 2 });
 
       res.status(200)
         .json({

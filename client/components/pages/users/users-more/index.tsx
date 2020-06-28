@@ -1,24 +1,16 @@
 import React from 'react';
-
+import { observer } from 'mobx-react';
 import Button from '~/components/button';
-import useDispatch from '~/store/dispatch';
-import { requestMore } from '~/store/users-page/actions';
-import { UsersContext } from '~/pages/users';
-
-
+import { useStore } from '~/store';
 
 function UsersMore() {
-  const { users } = React.useContext(UsersContext);
-  const dispatch = useDispatch();
-
-  const handleClick = () => dispatch(requestMore());
+  const { usersPage: { users, requestMoreUsers } } = useStore();
 
   if (!users || !users.hasNextPage) return null;
 
   return (
-    <Button onClick={handleClick}>Load more</Button>
+    <Button onClick={requestMoreUsers}>Load more</Button>
   );
 }
 
-
-export default UsersMore;
+export default observer(UsersMore);

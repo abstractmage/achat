@@ -1,12 +1,10 @@
 import express, { Application } from 'express';
 import SocketIO from 'socket.io';
-import Cookie from 'cookie';
-
+import http, { Server } from 'http';
 import config from './app.config.json';
 import BaseController from './types/base-controller';
 import MiddleWare from './types/middleware';
-import getUserByToken from './utils/get-user-by-token';
-import UnauthorizedError from './utils/errors/unauthorized-error';
+import createSocket from './utils/create-socket';
 
 
 interface AppOptions {
@@ -16,14 +14,17 @@ interface AppOptions {
 
 class App {
   public express: Application;
+  public http: Server;
   public port: number;
-  public io!: SocketIO.Server;
+  public io: SocketIO.Server;
   public controllers!: BaseController[];
 
 
   constructor(options: AppOptions = {}) {
-    this.express = express();
     this.port = config.port;
+    this.express = express();
+    this.http = http.createServer(this.express);
+    this.io = createSocket(this.http);
 
     options.middleWares && this.initMiddlewares(options.middleWares);
     options.controllers && this.initControllers(options.controllers);
@@ -33,6 +34,11 @@ class App {
   private initMiddlewares(middleWares: MiddleWare[]) {
     middleWares.forEach(middleWare => {
       this.express.use(middleWare);
+    });
+
+    this.express.use((_, res, next) => {
+      res.locals.io = this.io;
+      next();
     });
   }
 
@@ -47,33 +53,9 @@ class App {
 
 
   public listen() {
-    const server = this.express.listen(this.port, () => {
+    this.http.listen(this.port, () => {
       console.log(`App listening on the http://localhost:${this.port}`)
     });
-
-    this.io = SocketIO(server);
-
-    this.io.use(async (socket, next) => {
-      const { 'access-token': accessTokenVal } = Cookie.parse(socket.handshake.headers['cookie'] || '');
-      const user = await getUserByToken(accessTokenVal);
-
-      if (!user) {
-        next(new UnauthorizedError({
-          message: 'Web Socket Connection Failed: Unauthorized',
-        }));
-        return;
-      }
-
-      // socket.in(`user-${user._id}`);
-
-      next();
-    });
-
-    this.controllers.forEach(controller => {
-      controller.setSocketServer && controller.setSocketServer(this.io);
-    });
-
-    return server;
   }
 }
 

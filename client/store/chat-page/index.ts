@@ -1,0 +1,31 @@
+import { observable, action } from 'mobx';
+import Chat from '~/types/chat';
+import api from '~/utils/api';
+import Message from '~/types/message';
+
+class ChatPageStore {
+  @observable input: string = '';
+  @observable chat: Chat | null = null;
+
+  @action setInput = (input: string) => this.input = input;
+  @action setChat = (chat: Chat | null) => this.chat = chat;
+  @action requestSendMessage = async () => {
+    if (!this.chat) return;
+
+    await api.sendMessage(this.input, this.chat._id);
+
+    this.input = '';
+  };
+
+  @action addMessage = (message: Message) => {
+    if (!this.chat || !this.chat.messages) return;
+
+    this.chat.messages.docs = [message, ...this.chat.messages.docs];
+  };
+
+  hydrate(store: ChatPageStore) {
+    if (store.chat) this.setChat(store.chat);
+  }
+}
+
+export default ChatPageStore;

@@ -26,8 +26,6 @@ interface CreateMessageData {
 
 class MessageController implements BaseController {
   router = Router();
-  io!: SocketIO.Server;
-
 
   constructor() {
     this.initRoutes();
@@ -40,11 +38,6 @@ class MessageController implements BaseController {
       this.createMessage,
     );
   }
-
-
-  setSocketServer = (io: SocketIO.Server) => {
-    this.io = io;
-  };
 
 
   private validateMessageData(data: CreateMessageData) {
@@ -102,6 +95,7 @@ class MessageController implements BaseController {
     try {
       const { chatId, value } = req.body as CreateMessageBody;
       const user = res.locals.user as UserDocument;
+      const io = res.locals.io as SocketIO.Server;
       const validationResult = await this.validateMessageData({ chatId, value, userId: user.id });
 
       if (!validationResult.success) throw new ValidationError({
@@ -117,6 +111,8 @@ class MessageController implements BaseController {
         user: user.id,
         value,
       });
+
+      io.to(`chat[${chatId}]`).emit('server:message', message);
 
       res.status(201)
         .json({

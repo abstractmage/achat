@@ -2,13 +2,12 @@ import React from 'react';
 import { AppProps } from 'next/app';
 import Link from 'next/link';
 import cx from 'classnames';
-
+import { observer } from 'mobx-react';
 import './styles.scss';
 import UserSVG from './svg/user.svg';
 import MessageSVG from './svg/message.svg';
 import UsersSVG from './svg/users.svg';
 import { useSyncLogout } from '~/utils/hooks';
-
 
 function App(props: AppProps) {
   const { pageProps, Component, router } = props;
@@ -19,7 +18,7 @@ function App(props: AppProps) {
     <div className="app">
       <div className="app__container">
         <div className="app__nav">
-          <Link href="/">
+          <Link href="/" shallow>
             <a
               className={cx(
                 'app__nav-link',
@@ -31,7 +30,7 @@ function App(props: AppProps) {
               </div>
             </a>
           </Link>
-          <Link href="/chats">
+          <Link href="/chats" shallow>
             <a
               className={cx(
                 'app__nav-link',
@@ -43,7 +42,7 @@ function App(props: AppProps) {
               </div>
             </a>
           </Link>
-          <Link href="/users">
+          <Link href="/users" shallow>
             <a
               className={cx(
                 'app__nav-link',
@@ -65,5 +64,4 @@ function App(props: AppProps) {
   );
 }
 
-
-export default App;
+export default observer(App);

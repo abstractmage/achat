@@ -1,35 +1,19 @@
 import React from 'react';
-import { NextPageContext } from 'next';
-import { useSelector } from 'react-redux';
-import Nookies from 'nookies';
 
 import api from '~/utils/api';
-import { defaultState } from '~/store/chat-page/reducer';
-import { chatPageSelector } from '~/store/chat-page/selectors';
-import { setChat, requestChat } from '~/store/chat-page/actions';
 import ChatComponent from '~/components/pages/chat';
-import auth from '~/utils/auth';
 import { AxiosError } from 'axios';
-import { setUser } from '~/store/auth/actions';
 import redirect from '~/utils/redirect';
-import { AppState, AppAction } from '~/store/types';
-
-
-export const ChatContext = React.createContext(defaultState);
+import PageContext from '~/types/page-context';
 
 function Chat() {
-  const chatPageState = useSelector(chatPageSelector);
-
   return (
-    <ChatContext.Provider value={chatPageState}>
-      <ChatComponent />
-    </ChatContext.Provider>
+    <ChatComponent />
   );
 }
 
-Chat.getInitialProps = async (ctx: NextPageContext<AppState, AppAction>) => {
-  const { dispatch } = ctx.store;
-  const isServer = !!ctx.res;
+Chat.getInitialProps = async (ctx: PageContext) => {
+  const { store } = ctx;
 
   try {
     await api.prepare(ctx, async () => {
@@ -37,12 +21,12 @@ Chat.getInitialProps = async (ctx: NextPageContext<AppState, AppAction>) => {
         api.getChat(ctx.query.id as string),
         api.getAuthUser(),
       ]);
-      
+
       const { data: chat } = result1;
       const { data: { user } } = result2;
 
-      dispatch(setChat(chat));
-      dispatch(setUser(user));
+      store.chatPage.setChat(chat);
+      store.auth.setUser(user);
 
       return result1;
     });
@@ -52,13 +36,13 @@ Chat.getInitialProps = async (ctx: NextPageContext<AppState, AppAction>) => {
       const error: AxiosError = err;
 
       if (error.response!.status === 401) {
-        dispatch(setUser(null));
+        store.auth.setUser(null);
         await redirect(ctx);
       }
     }
   }
 
-  return { isServer };
+  return { isServer: !!ctx.res };
 };
 
 

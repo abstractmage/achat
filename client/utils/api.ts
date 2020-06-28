@@ -1,4 +1,5 @@
 import Axios, { AxiosError, AxiosResponse } from 'axios';
+import Qs from 'qs';
 
 import { apiURL } from '~/app.config';
 import getFinger from './get-finger';
@@ -6,8 +7,7 @@ import User from '~/types/user';
 import Pagination from '~/types/pagination';
 import Chat from '~/types/chat';
 import Message from '~/types/message';
-import { NextPageContext } from 'next';
-import { AppState, AppAction } from '~/store/types';
+import PageContext from '~/types/page-context';
 
 
 export interface SendMessageResult {
@@ -48,6 +48,9 @@ class Api {
   axios = Axios.create({
     baseURL: apiURL,
     withCredentials: true,
+    paramsSerializer: function (params) {
+      return Qs.stringify(params, { arrayFormat: 'brackets' });
+    },
   });
 
 
@@ -56,7 +59,7 @@ class Api {
   }
 
   
-  async prepare(ctx: NextPageContext<AppState, AppAction>, action: (...params: any) => Promise<AxiosResponse>) {
+  async prepare(ctx: PageContext, action: (...params: any) => Promise<AxiosResponse>) {
     const isServer = !!ctx.req;
 
     if (isServer) {
@@ -74,7 +77,7 @@ class Api {
   async signIn(email: string, password: string) {
     const fingerprint = await getFinger();
 
-    return this.axios.post<SignInResult>('/auth/sign-in', {
+    return this.axios.post<SignInResultData>('/auth/sign-in', {
       email,
       password,
       fingerprint,
@@ -101,15 +104,19 @@ class Api {
     return this.axios.get<GetUsersResult>('/users', {
       params: {
         query,
-        'pagination[limit]': count,
+        pagination: {
+          limit: count,
+        },
         'with-auth-user': withAuthUser,
       },
     });
   }
 
 
-  async getChat(id: string) {
-    return this.axios.get<GetChatResult>(`/chat/${id}`);
+  async getChat(id: string, lastMessages: number = 10) {
+    return this.axios.get<GetChatResult>(`/chat/${id}`, {
+      params: { lastMessages },
+    });
   }
 
 

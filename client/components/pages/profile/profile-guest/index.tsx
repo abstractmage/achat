@@ -1,40 +1,22 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-
+import { observer } from 'mobx-react';
 import AnonymousSVG from './svg/anonymous.svg';
 import Button from '~/components/button';
 import ProfileSignIn from './../profile-sign-in';
 import ProfileSignUp from './../profile-sign-up';
-import useDispatch from '~/store/dispatch';
-import { clearSignIn, clearSignUp } from '~/store/index-page/actions';
+import { useStore } from '~/store';
 
-
-interface ProfileGuestProps {
-  activeModal?: 'sign-up' | 'sign-in';
-}
-
-function ProfileGuest(props: ProfileGuestProps) {
-  const { activeModal } = props;
+function ProfileGuest() {
+  const store = useStore();
   const router = useRouter();
-  const dispatch = useDispatch();
-  const [modalIn, setModalIn] = React.useState(activeModal === 'sign-in');
-  const [modalUp, setModalUp] = React.useState(activeModal === 'sign-up');
 
   React.useEffect(() => {
-    if (router.query.modal === 'sign-in') {
-      dispatch(clearSignIn());
-      setModalIn(true);
-      setModalUp(false);
-    } else if (router.query.modal === 'sign-up') {
-      dispatch(clearSignUp());
-      setModalIn(false);
-      setModalUp(true);
-    } else {
-      setModalIn(false);
-      setModalUp(false);
-    }
-  }, [router.query.modal, dispatch]);
+    if (router.query.modal === 'sign-in') store.indexPage.toggleSignIn(true);
+    else if (router.query.modal === 'sign-up') store.indexPage.toggleSignUp(true);
+    else store.indexPage.closeModals();
+  }, [router.query.modal, store.indexPage]);
 
   return (
     <div className="profile">
@@ -51,17 +33,17 @@ function ProfileGuest(props: ProfileGuestProps) {
       <div className="profile__semi-header">
         <span className="profile__semi-header-text">you can:</span>
       </div>
-      <Link href="?modal=sign-in" passHref>
+      <Link href="/?modal=sign-in" passHref shallow>
         <Button className="profile__button" component="a">Sign in</Button>
       </Link>
-      <Link href="?modal=sign-up" passHref>
+      <Link href="/?modal=sign-up" passHref shallow>
         <Button className="profile__button" component="a">Sign up</Button>
       </Link>
-      <ProfileSignIn show={modalIn} />
-      <ProfileSignUp show={modalUp} />
+      <ProfileSignIn />
+      <ProfileSignUp show={store.indexPage.signUpModal.opened} />
     </div>
   );
 }
 
 
-export default ProfileGuest;
+export default observer(ProfileGuest);
