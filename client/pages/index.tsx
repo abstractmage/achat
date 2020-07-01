@@ -22,10 +22,10 @@ Index.getInitialProps = async (ctx: PageContext) => {
       return result;
     });
   } catch (err) {
-    console.log(err);
+    store.auth.setUser(null);
   }
 
-  return { isServer: !!ctx.req };
+  return { store };
 };
 
 export default Index;

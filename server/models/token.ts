@@ -2,7 +2,7 @@ import Mongoose from './../mongoose';
 
 import User from './user';
 import { encode, decode } from './../utils/token-service';
-import { auth } from './../app.config.json';
+import { auth } from '../app.config';
 
 
 export interface TokenDocument extends Mongoose.Document {

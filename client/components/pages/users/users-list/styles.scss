@@ -2,4 +2,28 @@
   &__list {
     padding-bottom: 25px;
   }
+
+  &__item_transition {
+    &-enter {
+      opacity: 0;
+      transform: scale(0);
+    }
+
+    &-enter-active {
+      transition: opacity 1s, transform 1s;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    &-exit {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    &-exit-active {
+      transition: opacity 1s, transform 1s;
+      opacity: 0;
+      transform: scale(0);
+    }
+  }
 }

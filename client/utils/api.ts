@@ -43,6 +43,13 @@ export interface RefreshTokensResult {
 }
 
 export type CreateChatResult = { chat: Chat };
+export type GetChatsResult = Pagination<{
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  companion: User;
+  message: Message | null;
+}>;
 
 class Api {
   axios = Axios.create({
@@ -66,11 +73,14 @@ class Api {
       ctx.req!.headers['cookie'] && this.pushCookies(ctx.req!.headers['cookie']);
     }
 
-    const { headers } = await action();
+    const result = await action();
+    const { headers } = result;
 
     if (isServer) {
       headers['set-cookie'] && ctx.res!.setHeader('Set-Cookie', headers['set-cookie']);
     }
+
+    return result;
   }
 
 
@@ -127,6 +137,18 @@ class Api {
   
   async sendMessage(value: string, chatId: string) {
     return this.axios.post<SendMessageResult>('/message', { value, chatId });
+  }
+
+
+  async getChats(query?: string, count?: number) {
+    return this.axios.get<GetChatsResult>('/chats', {
+      params: {
+        query,
+        pagination: {
+          limit: count,
+        },
+      },
+    });
   }
 }
 

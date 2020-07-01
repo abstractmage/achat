@@ -120,7 +120,7 @@ class IndexPageStore {
   }
 
   hydrate(store: IndexPageStore) {
-    // console.log(store);
+    return store;
   }
 }
 

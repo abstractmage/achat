@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 import Mongoose from '../mongoose';
-import { auth } from '../app.config.json';
+import { auth } from '../app.config';
 
 
 export const encode = (id: Mongoose.Types.ObjectId, type: 'access' | 'refresh') =>

@@ -2,6 +2,7 @@ import { observable, action } from 'mobx';
 import Chat from '~/types/chat';
 import api from '~/utils/api';
 import Message from '~/types/message';
+import Router from 'next/router';
 
 class ChatPageStore {
   @observable input: string = '';
@@ -21,6 +22,15 @@ class ChatPageStore {
     if (!this.chat || !this.chat.messages) return;
 
     this.chat.messages.docs = [message, ...this.chat.messages.docs];
+  };
+
+  @action requestMoreMessages = async () => {
+    try {
+      const { data: chat } = await api.getChat(this.chat!._id, this.chat!.messages!.docs.length + 10);
+      this.setChat(chat);
+    } catch (err) {
+      Router.push('/', '/', { shallow: true });
+    }
   };
 
   hydrate(store: ChatPageStore) {

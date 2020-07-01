@@ -1,5 +1,4 @@
 import React from 'react';
-import { AxiosError } from 'axios';
 
 import UsersComponent from '~/components/pages/users';
 import api from '~/utils/api';
@@ -26,13 +25,15 @@ Users.getInitialProps = async (ctx: PageContext) => {
     });
   } catch (err) {
     console.log(err.response);
-    if (err.isAxiosError && err.response) {
-      const error: AxiosError = err;
+    await redirect(ctx);
 
-      if (error.response!.status === 401) {
-        await redirect(ctx);
-      }
-    }
+    // if (err.isAxiosError && err.response) {
+    //   const error: AxiosError = err;
+
+    //   if (error.response!.status === 401) {
+    //     await redirect(ctx);
+    //   }
+    // }
   }
 
   return { isServer: !!ctx.req };

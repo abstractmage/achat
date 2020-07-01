@@ -34,10 +34,6 @@ class App extends NextApp<{ initialStoreData: AppStore }> {
     return state;
   }
 
-  componentDidMount() {
-    IO.getInstance();
-  }
-
   render() {
     return (
       <Provider store={this.state.store}>

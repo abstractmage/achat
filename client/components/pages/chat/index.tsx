@@ -26,9 +26,13 @@ const getMessageTime = (time: string) => {
 
 const useScrollBottom = (docs: any[]) => {
   const bodyRef = React.useRef<HTMLDivElement>(null);
+  const firstScroll = React.useRef(true);
 
   React.useEffect(() => {
-    bodyRef.current && bodyRef.current.scrollTo(0, bodyRef.current.scrollHeight);
+    if (bodyRef.current && firstScroll.current) {
+      bodyRef.current.scrollTo(0, bodyRef.current.scrollHeight);
+      firstScroll.current = false
+    }
   }, [bodyRef, docs]);
 
   return bodyRef;
@@ -50,6 +54,7 @@ const useChatSocket = (chatId: string, action: (message: Message) => void) => {
 
 const useChatProps = () => {
   const store = useStore();
+  console.log(store.chatPage);
   const authUser = store.auth.user!;
   const companion = store.chatPage.chat!.users!.docs.find(u => u._id !== authUser!._id)!;
   const input = store.chatPage.input;
@@ -68,14 +73,40 @@ const useChatProps = () => {
     setInput: store.chatPage.setInput,
     sendMessage: store.chatPage.requestSendMessage,
     addMessage: store.chatPage.addMessage,
+    requestMore: store.chatPage.requestMoreMessages,
   };
 };
 
+const useScrollTopTrigger = (bodyRef: React.RefObject<HTMLDivElement>, action: Function) => {
+  console.log(bodyRef);
+  React.useEffect(() => {
+    const body = bodyRef.current;
+
+    const handleScroll = () => {
+      if (body && body.scrollTop === 0) action();
+    };
+
+    body && body.addEventListener('scroll', handleScroll);
+
+    return () => {
+      body && body.removeEventListener('scroll', handleScroll);
+    };
+  }, [bodyRef, action]);
+};
+
 function Chat() {
-  const { companion, input, setInput, chat, sendMessage, addMessage } = useChatProps();
+  const { companion, input, setInput, chat, sendMessage, addMessage, requestMore } = useChatProps();
   const bodyRef = useScrollBottom(chat.messages.docs);
 
-  useChatSocket(chat._id, addMessage);
+  useChatSocket(chat._id, message => {
+    addMessage(message);
+    bodyRef.current && bodyRef.current.scrollTo(0, bodyRef.current.scrollHeight);
+  });
+
+  useScrollTopTrigger(bodyRef, () => {
+    bodyRef.current && bodyRef.current.scrollTo(0, 10);
+    requestMore();
+  });
 
   return (
     <div className="chat">

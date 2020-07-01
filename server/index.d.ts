@@ -3,7 +3,7 @@ declare module "*.json" {
   export default value;
 }
 
-declare module 'express-fingerprint' {
-  const weatherJs: any; 
-  export default weatherJs;
+declare module 'mongoose-aggregate-paginate-v2' {
+  const value: any;
+  export default value;
 }

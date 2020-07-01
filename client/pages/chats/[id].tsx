@@ -15,6 +15,8 @@ function Chat() {
 Chat.getInitialProps = async (ctx: PageContext) => {
   const { store } = ctx;
 
+  console.log(ctx.query.id);
+
   try {
     await api.prepare(ctx, async () => {
       const [result1, result2] = await Promise.all([
@@ -32,14 +34,16 @@ Chat.getInitialProps = async (ctx: PageContext) => {
     });
   } catch (err) {
     console.log(err.response);
-    if (err.isAxiosError && err.response) {
-      const error: AxiosError = err;
+    await redirect(ctx);
 
-      if (error.response!.status === 401) {
-        store.auth.setUser(null);
-        await redirect(ctx);
-      }
-    }
+    // if (err.isAxiosError && err.response) {
+    //   const error: AxiosError = err;
+
+    //   if (error.response!.status === 401) {
+    //     store.auth.setUser(null);
+    //     await redirect(ctx);
+    //   }
+    // }
   }
 
   return { isServer: !!ctx.res };

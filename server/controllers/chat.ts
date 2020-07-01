@@ -8,7 +8,7 @@ import ChatUser from '../models/chat-user';
 import User, { UserDocument } from '../models/user';
 import Mongoose from '../mongoose';
 import ValidationError from '../utils/errors/validation-error';
-import Chat from '../models/chat';
+import Chat, { ChatDocument } from '../models/chat';
 import NotFoundError from '../utils/errors/not-found-error';
 import BadRequestError from '../utils/errors/bad-request-error';
 import Message from '../models/message';
@@ -19,8 +19,9 @@ interface CreateChatBody {
   userId: any;
 }
 
-interface GetChatQuery {
-  lastMessages: any;
+interface GetChatsQuery {
+  query: any;
+  pagination: any;
 }
 
 class ChatController implements BaseController {
@@ -40,6 +41,10 @@ class ChatController implements BaseController {
     this.router.get(['/chats/:id', '/chat/:id'],
       isAuthorized,
       this.getChat,
+    );
+    this.router.get(['/chats', '/chat'],
+      isAuthorized,
+      this.getChats,
     );
   }
 
@@ -164,6 +169,127 @@ class ChatController implements BaseController {
     } catch (err) {
       handleErrors(res, err);
     }
+  };
+
+
+  private getChats = async (req: Request, res: Response) => {
+    const reqQuery = req.query as any as GetChatsQuery;
+    const pagination = reqQuery.pagination;
+    const query = typeof reqQuery.query === 'string' ? reqQuery.query : '';
+    const user = res.locals.user as UserDocument;
+    const aggregate = Chat.aggregate([
+      {
+        $lookup: {
+          from: 'chat-users',
+          as: 'users',
+          let: { chatId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $and: [{ $eq: ['$chat', '$$chatId'] }] } } },
+            { $group: { _id: '$user' } },
+          ],
+        },
+      },
+      {
+        $match: {
+          $expr: { $in: [user._id, '$users._id'] },
+        },
+      },
+      {
+        $project: {
+          createdAt: 1,
+          updatedAt: 1,
+          users: {
+            $map: {
+              input: '$users',
+              as: 'user',
+              in: '$$user._id',
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          as: 'users',
+          localField: 'users',
+          foreignField: '_id',
+        },
+      },
+      {
+        $addFields: {
+          companion: {
+            $arrayElemAt: [
+              {
+                $filter: {
+                  input: '$users',
+                  as: 'user',
+                  cond: { $not: { $eq: [user._id, '$$user._id'] } },
+                },
+              },
+              0
+            ]
+          },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $or: [
+              {
+                $regexMatch: {
+                  input: '$companion.nickname',
+                  regex: query,
+                  options: 'i',
+                },
+              },
+              {
+                $regexMatch: {
+                  input: '$companion.email',
+                  regex: query,
+                  options: 'i',
+                },
+              },
+            ],
+          },  
+        },
+      },
+      {
+        $lookup: {
+          from: 'messages',
+          as: 'message',
+          let: { chat: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$chat', '$$chat'] } } },
+            { $sort: { createdAt: -1 } },
+            { $limit: 1 },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          message: {
+            $ifNull: [{ $arrayElemAt: ['$message', 0] }, null],
+          },
+        },
+      },
+      {
+        $project: {
+          createdAt: 1,
+          updatedAt: 1,
+          'companion._id': 1,
+          'companion.nickname': 1,
+          'companion.email': 1,
+          'companion.createdAt': 1,
+          'companion.updatedAt': 1,
+          message: 1,
+        },
+      },
+    ]);
+
+    const chats = await Chat.aggregatePaginate(aggregate, { ...pagination, sort: { message: { createdAt: -1 } } });
+
+    res.status(200)
+      .json(chats);
   };
 }
 

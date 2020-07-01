@@ -18,10 +18,15 @@ body,
   display: flex;
 
   &__container {
-    width: 680px;
-    margin: 50px auto;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    margin: 40px 20px;
+
+    @media (min-width: 720px) {
+      width: 680px;
+      margin: 50px auto;
+    }
   }
 
   &__nav {

@@ -8,7 +8,7 @@ class AuthStore {
 
   @action setUser = (user: User | null) => {
     this.user = user;
-  }
+  };
 
   @action logout = async () => {
     try {
@@ -18,20 +18,21 @@ class AuthStore {
     } catch (err) {
       console.log('auth logout ---', err);
     }
-  }
+  };
 
   userReaction = reaction(
     () => this.user,
     user => {
       if (user === null && typeof window !== 'undefined') {
         IO.disconnect();
+      } else if (user && typeof window !== 'undefined') {
+        IO.getInstance();
       }
     },
   );
 
-  @action
-  hydrate(store: AuthStore) {
-    if (store.user) this.setUser(store.user);
+  @action hydrate(store: AuthStore) {
+    this.setUser(store.user);
   }
 }
 

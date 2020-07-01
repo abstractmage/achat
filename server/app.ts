@@ -1,11 +1,10 @@
 import express, { Application } from 'express';
 import SocketIO from 'socket.io';
 import http, { Server } from 'http';
-import config from './app.config.json';
+import config from './app.config';
 import BaseController from './types/base-controller';
 import MiddleWare from './types/middleware';
 import createSocket from './utils/create-socket';
-
 
 interface AppOptions {
   middleWares?: MiddleWare[];
@@ -54,10 +53,10 @@ class App {
 
   public listen() {
     this.http.listen(this.port, () => {
-      console.log(`App listening on the http://localhost:${this.port}`)
+      console.log(process.env.NODE_ENV);
+      console.log(`App listening on the http://${config.host}:${this.port}`);
     });
   }
 }
-
 
 export default App;

@@ -1,4 +1,5 @@
 import { observable, action } from 'mobx';
+import Router from 'next/router';
 import Pagination from '~/types/pagination';
 import User from '~/types/user';
 import api from '~/utils/api';
@@ -13,6 +14,15 @@ class UsersPageStore {
   @action requestUsers = async () => {
     const { data: users } = await api.getUsers(this.query);
     this.setUsers(users);
+  };
+
+  @action createChat = async (userId: string) => {
+    try {
+      const { data: { chat } } = await api.createChat(userId);
+      Router.push(`/chats/[id]`, `/chats/${chat._id}`, { shallow: true });
+    } catch (err) {
+      Router.push('/', '/', { shallow: true });
+    }
   };
 
   @action requestMoreUsers = async () => {
